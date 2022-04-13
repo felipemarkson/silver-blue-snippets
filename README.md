@@ -254,3 +254,35 @@ If you're like me and have messed around with rebases, you may find /sysroot/ost
 Instead, you just need to prune. This freed up 15GB for me, but your results may vary depending on your rebases.
 
 ```sudo ostree prune```
+
+## Accessing USB serial devices 
+
+ Grab the entry from the OS group file and add it to /etc/group ourselves.
+ 
+`grep ^dialout: /usr/lib/group |sudo tee -a /etc/group`
+ 
+ Add ourselves to the dialout group
+ 
+`sudo gpasswd -a ${USER} dialout`
+
+Activate that group in the current shell
+
+`newgrp dialout`
+
+### For toolbox
+
+Create a generic udev rule for all usb-serial devices
+```
+cat << EOF | sudo tee /etc/udev/rules.d/50-usb-serial.rules
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb-serial", OWNER="${USER}"
+EOF
+```
+
+Reload udev
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+
+
